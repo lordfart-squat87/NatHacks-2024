@@ -16,6 +16,7 @@ for idea in idea:
     print(idea)
 
 #Nick was here
+<<<<<<< HEAD
 
 x = 10
 
@@ -25,3 +26,6 @@ while x > 0:
     x = x - 1
 
 
+=======
+print('nick was here')
+>>>>>>> a33f1d611d25866d6089279e671d024dafc4587a
