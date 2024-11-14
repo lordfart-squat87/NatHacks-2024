@@ -1,1 +1,3 @@
-print('This will act as the main platform')
+
+
+print("no nt november bro, stay locked in chat")
