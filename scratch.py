@@ -1,4 +1,5 @@
 print('Hello World')
+print('Learning how to push and commit')
 
 for x in range(4):
     print('test')
