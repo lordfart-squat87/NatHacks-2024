@@ -1,0 +1,1 @@
+print('This will act as the main platform')
