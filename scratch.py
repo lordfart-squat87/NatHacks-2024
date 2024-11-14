@@ -5,3 +5,9 @@ for x in range(4):
 
 user_input = input("Enter Name: ")
 print("You entered:", user_input)
+
+print('Yoink')
+print('This is inportant')
+idea = [2, 3, 5, 6, 10]
+for idea in idea:
+    print(idea)
