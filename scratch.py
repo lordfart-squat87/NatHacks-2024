@@ -12,3 +12,5 @@ print('This is inportant')
 idea = [2, 3, 5, 6, 10]
 for idea in idea:
     print(idea)
+
+#Nick was here
