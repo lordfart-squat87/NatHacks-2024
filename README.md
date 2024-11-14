@@ -10,5 +10,5 @@
 - Jimmy
 
 # Project
-**Project Idea:**
+**Project Idea Insert:**
 [Insert out project idea and explaination]
