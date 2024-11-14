@@ -14,3 +14,4 @@ for idea in idea:
     print(idea)
 
 #Nick was here
+print('nick was here')
