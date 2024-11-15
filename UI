@@ -1,1 +1,145 @@
+from graphics import * 
+import time as t
 
+#def focus_time():
+    #focus = Text(Point(250,250), 'FOCUS ON YOUR TASK')
+
+def button(x,y,string,win):    
+    button = Rectangle(Point(x,y), Point(x+300, y+300))
+    button.draw(win)
+    text = Text(Point(x+150, y+150), string)  
+    text.draw(win)
+        
+    return button
+               
+def button_clicked(pt, button):
+    '''
+    purpose: detect when a button is clicked 
+    parameters: pt, button
+    return: bool 
+    '''     
+    x, y = pt.getX(), pt.getY()
+    
+    ul = button.getP1()
+    lr = button.getP2()
+    
+    ulx = ul.getX()
+    uly = ul.getY()
+    
+    lrx = lr.getX()
+    lry = lr.getY()
+    
+    if ulx <= x <= lrx and uly <= y <= lry:
+        return True
+    return False  
+
+def stopwatch(win): 
+    '''
+    purpose: display stopwatch, (purely visual, I think someone else is actually gon track the data and stuff w/ time) 
+    parameters: none 
+    return: tbd 
+    '''
+    time_display = Text(Point(50, 25), '00h.00m.00s')
+    time_display.draw(win)
+    
+    start_time = t.time() 
+    running = True 
+    
+    while running: 
+        elapsed_time = t.time() - start_time
+        time_display.setText(f"{elapsed_time:.2f} s")
+        time.sleep(0.1)        
+    
+
+def graphmain(): 
+    win = GraphWin('Study Buddy', 500, 500) 
+    win.setBackground('white') 
+    
+    start = Rectangle(Point(150, 150), Point(350, 350)) 
+    start.draw(win) 
+    start_text = Text(Point(250, 250), 'start')
+    start_text.draw(win)
+    title = Text(Point(250, 25),'Welcome to study buddy, press the "start" button to begin')
+    title.draw(win)
+    
+    quit = Rectangle(Point(400, 400), Point(475, 475))
+    quit_text = Text(Point(437, 437), 'quit') 
+    quit.draw(win)
+    quit_text.draw(win)   
+    
+    tt_hours = 0 
+    tt_minutes = 25 
+    tt_seconds = 34
+    
+    td_hours = 0 
+    td_minutes = 0 
+    td_seconds = 0 
+    
+    severity = 'good'
+    
+    while True:
+        try:
+            pt = win.getMouse()
+        except:
+            break
+        
+        if button_clicked(pt, quit): 
+            win.close()                          
+        
+        if button_clicked(pt, start): 
+            start.undraw()
+            start_text.undraw()
+            title.undraw()
+                        
+            stopwatch(win)
+            #brain wave graph here 
+            
+            global stop
+            stop = Rectangle(Point(25, 400), Point(100, 475)) 
+            stop_text = Text(Point(63, 437), 'stop')
+            stop.draw(win)
+            stop_text.draw(win)
+        
+        elif button_clicked(pt, stop):
+            stats = Rectangle(Point(212, 400), Point(288, 475)) 
+            stats_text = Text(Point(250, 437), 'stats')
+            stats.draw(win)
+            stats_text.draw(win)   
+            
+            reset = Rectangle(Point(125, 400), Point(200, 475)) 
+            reset_text = Text(Point(162, 437), 'reset')
+            reset.draw(win)
+            reset_text.draw(win)                
+                        
+        elif button_clicked(pt, reset):
+            reset.undraw()
+            reset_text.undraw()
+            
+            stats.undraw()
+            stats_text.undraw()
+            ttt.undraw()
+            td.undraw() 
+            diagnosis
+            
+            stop.undraw() 
+            stop_text.undraw() 
+            
+            start.draw(win)
+            start_text.draw(win)
+        
+        elif button_clicked(pt, stats): 
+            ttt = Text(Point(250, 25), f'total time spent was {tt_hours}hours, {tt_minutes}minutes, and {tt_seconds}seconds')
+            ttt.draw(win)
+            td = Text(Point(250, 50), f'total time spent distracted was {td_hours}hours, {td_minutes}minutes, and {td_seconds}seconds')
+            td.draw(win) 
+            diagnosis = Text(Point(250, 250), f'based on your total time to time distracted ratio and our source at [...], we calculated that you have {severity} problems focusing') 
+            diagnosis.draw(win)
+                            
+    #while flag == False: 
+        #if flag == True: 
+            #focus_time() 
+            
+graphmain() 
+        
+#make realtime with x axis as time and y axis as brain waves, if y is too high or low
+#send indicator 
