@@ -29,4 +29,8 @@ exit()
 #then open anaconda and vs code where I created test.py so in theory that should work
 with that get the spike checker working and with the spike checker get it to run along the python code and there should be a realse in data in tht py shell
 When going through the code in python and running through the anaconda for some reason it doesn't run the shell as expected 
+
+althtough with changed placement on my head I seem to get mroe resposive streams outside of my 10HZ range with of my spikes 
+going in btween 13 - 30 HZ and frmo there it seems to maybe be an imrpovment
+pleaswe refer to andreis images in 2 in the downloads
 """
