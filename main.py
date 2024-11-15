@@ -33,12 +33,12 @@ def display_current_site(current):
 
 def display_hint(message):
     '''
-    Displays navigation hint message centered in the terminal.
+    Displays navigation hint message centered at the bottom of the terminal.
     Input:
         - message (str): navigation hint message
     Returns: N/A
     '''
-    print("\033[40;30;47m{:^80}\033[0m".format(message))
+    print("\033[24;0H\033[40;30;47m{:^80}\033[0m".format(message))
 
 def main():
     HOME = 'Are You Ready to Take a DEEP Breath'
@@ -50,6 +50,7 @@ def main():
         print_header()
         display_current_site(current)
 
+        # Display hint message at the bottom
         display_hint("Hold the Space Bar when you INHALE")
         action = input()
 
