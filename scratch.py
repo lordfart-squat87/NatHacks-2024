@@ -1,3 +1,5 @@
+#this is just the python platform where we learned how to push and pull on a github repo
+
 print('Hello World')
 print('Learning how to push and commit')
 
