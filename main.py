@@ -25,4 +25,7 @@ and if there are no errors then all libraries were downloaded properly
 
 #input this at the end to exit anaconda Prompt
 exit()
+
+#then open anaconda and vs code where I created test.py so in theory that should work
+with that get the spike checker working and with the spike checker get it to run along the python code and there should be a realse in data in tht py shell
 """
