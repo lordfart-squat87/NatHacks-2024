@@ -1,0 +1,148 @@
+//
+// Spike Recorder Arduino Code - Final Integrated Version
+// Made for Muscle SpikerShield and compatible with Spike Recorder software
+// Sends raw signal data via USB (virtual serial port)
+//
+
+#define EKG A0 // Read from Analog Input 0
+#define BUFFER_SIZE 100  // Sampling buffer size
+#define SIZE_OF_COMMAND_BUFFER 30 // Command buffer size
+#define LENGTH_OF_MESSAGE_IMPULS 100 // Length of message impulse in ms
+
+// Defines for setting and clearing register bits
+#ifndef cbi
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
+
+// Global variables
+int buffersize = BUFFER_SIZE;
+int head = 0; // Circular buffer head index
+int tail = 0; // Circular buffer tail index
+byte writeByte;
+char commandBuffer[SIZE_OF_COMMAND_BUFFER]; // Command input buffer
+byte reading[BUFFER_SIZE]; // Circular sampling buffer
+
+int messageImpulsPin = 5;
+int messageImpulseTimer = 0;
+
+int redButton = 4;
+int greenButton = 7;
+int redLED = 13;
+int greenLED = 8;
+
+int redLEDCounter = 0;
+int greenLEDCounter = 0;
+int redButtonReady = 1;
+int greenButtonReady = 1;
+
+int interrupt_Number = 198; // Timer interrupt configuration
+int numberOfChannels = 1;   // Number of active channels
+int tempSample = 0;         // Temporary sample storage
+int commandMode = 0;        // Command mode flag (1 when active)
+
+// Timer debouncing
+long debouncing_time = 15; // Debouncing time in milliseconds
+volatile unsigned long last_micros;
+
+void setup() {
+  Serial.begin(230400); // Serial communication baud rate
+  delay(300);           // Wait for initialization
+  Serial.println("StartUp!");
+  Serial.setTimeout(2);
+
+  pinMode(messageImpulsPin, OUTPUT);
+  pinMode(redLED, OUTPUT);
+  pinMode(greenLED, OUTPUT);
+  pinMode(redButton, INPUT);
+  pinMode(greenButton, INPUT);
+
+  // TIMER SETUP
+  cli(); // Stop interrupts
+
+  // Optimize ADC clock for faster sampling (Prescaler = 16)
+  sbi(ADCSRA, ADPS2);
+  cbi(ADCSRA, ADPS1);
+  cbi(ADCSRA, ADPS0);
+
+  // Configure Timer1 interrupt at 10 kHz
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1 = 0;
+  OCR1A = interrupt_Number; // Output Compare Register
+  TCCR1B |= (1 << WGM12);   // CTC mode
+  TCCR1B |= (1 << CS11);    // Prescaler of 8
+  TIMSK1 |= (1 << OCIE1A);  // Enable timer compare interrupt
+
+  sei(); // Enable interrupts
+}
+
+// Timer interrupt routine
+ISR(TIMER1_COMPA_vect) {
+  if (messageImpulseTimer > 0) {
+    messageImpulseTimer--;
+    if (messageImpulseTimer == 0) {
+      digitalWrite(messageImpulsPin, LOW);
+    }
+  }
+
+  if (commandMode != 1) {
+    // Sample data and store in circular buffer
+    tempSample = analogRead(EKG);
+    reading[head] = (tempSample >> 7) | 0x80; // MSB set to 1 for frame start
+    head = (head + 1) % BUFFER_SIZE;
+    reading[head] = tempSample & 0x7F;        // Remaining 7 bits
+    head = (head + 1) % BUFFER_SIZE;
+
+    // Add support for multiple channels (up to 6)
+    for (int ch = 1; ch < numberOfChannels; ch++) {
+      tempSample = analogRead(A0 + ch);
+      reading[head] = (tempSample >> 7) & 0x7F; // 7 MSBs
+      head = (head + 1) % BUFFER_SIZE;
+      reading[head] = tempSample & 0x7F;        // 7 LSBs
+      head = (head + 1) % BUFFER_SIZE;
+    }
+  }
+}
+
+// Serial event handler for incoming commands
+void serialEvent() {
+  commandMode = 1;                     // Enter command mode
+  TIMSK1 &= ~(1 << OCIE1A);            // Disable sampling
+  String inString = Serial.readStringUntil('\n'); // Read command
+
+  inString.toCharArray(commandBuffer, SIZE_OF_COMMAND_BUFFER);
+  commandBuffer[inString.length()] = 0;
+
+  char *command = strtok(commandBuffer, ";");
+  while (command != 0) {
+    char *separator = strchr(command, ':');
+    if (separator != 0) {
+      *separator = 0;
+      separator++;
+      if (strcmp(command, "c") == 0) {
+        numberOfChannels = atoi(separator); // Set number of channels
+      } else if (strcmp(command, "p") == 0) {
+        // Set impulse
+        digitalWrite(messageImpulsPin, HIGH);
+        messageImpulseTimer = (LENGTH_OF_MESSAGE_IMPULS * 10) / numberOfChannels;
+      }
+    }
+    command = strtok(0, ";");
+  }
+
+  // Update sampling rate
+  OCR1A = (interrupt_Number + 1) * numberOfChannels - 1;
+  TIMSK1 |= (1 << OCIE1A); // Re-enable sampling
+  commandMode = 0;         // Exit command mode
+}
+
+void loop() {
+  // Send sampled data to Serial if available
+  while (head != tail && commandMode != 1) {
+    Serial.write(reading[tail]);
+    tail = (tail + 1) % BUFFER_SIZE;
+  }
+}
